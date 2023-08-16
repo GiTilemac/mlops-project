@@ -10,6 +10,7 @@ from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 from hyperopt.pyll import scope
 
 from prefect import flow, task
+from prefect_aws import S3Bucket
 
 # Utility functions used inside the tasks
 def objective(params, dtrain, dval, y_val):
@@ -31,6 +32,10 @@ def objective(params, dtrain, dval, y_val):
 @task(retries=3, retry_delay_seconds=2)
 def read_data(filename: str) -> pd.DataFrame:
     """ Read dataset into dataframe """
+
+    s3_bucket_block = S3Bucket.load("s3-bucket-block")
+    s3_bucket_block.download_folder_to_path(from_folder='data', to_folder="data")
+
     data_both_cohorts = pd.read_csv(filename)
     data = data_both_cohorts[data_both_cohorts['patient_cohort'] == 'Cohort1'] # Keep Cohort2 for later
     data['diagnosis'] = data['diagnosis'].apply(lambda d: d-1)
