@@ -62,7 +62,7 @@ def apply_model(input_file, run_id, output_file):
     model = load_model(run_id)
 
     logger.info('applying the model...')
-    y_pred = round(model.predict(xgb.DMatrix(X)))
+    y_pred = np.round(model.predict(xgb.DMatrix(X)))
 
     logger.info('saving the result to %s...', output_file)
 
