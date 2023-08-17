@@ -62,7 +62,7 @@ def apply_model(input_file, run_id, output_file):
     model = load_model(run_id)
 
     logger.info('applying the model...')
-    y_pred = model.predict(X)
+    y_pred = model.predict(xgb.DMatrix(X))
 
     logger.info('saving the result to %s...', output_file)
 
