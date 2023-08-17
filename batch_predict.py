@@ -29,7 +29,7 @@ def select_features(df: pd.DataFrame) -> np.ndarray:
     numerical = ['age','creatinine', 'LYVE1', 'REG1B', 'TFF1']
 
     X = df[categorical + numerical].values
-    return X.values
+    return X
 
 def load_model(run_id: str) -> xgb.Booster:
     logged_model = f's3://mlflow-artifacts-remote-tilemachos/1/{run_id}/artifacts/models_mlflow/'
