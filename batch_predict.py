@@ -11,6 +11,8 @@ from prefect_aws import S3Bucket
 from evidently.report import Report
 from evidently import ColumnMapping
 from evidently.metrics import ColumnDriftMetric, DatasetDriftMetric, DatasetMissingValuesMetric
+from evidently.test_suite import TestSuite
+from evidently.test_preset import DataDriftTestPreset
 
 import psycopg
 
@@ -42,7 +44,7 @@ def load_model(run_id: str) -> xgb.Booster:
     model = mlflow.xgboost.load_model(logged_model)
     return model
 
-def save_results(df, y_pred, run_id, output_file):
+def save_results(df, y_pred, run_id, output_file) -> pd.DataFrame:
     df_result = pd.DataFrame()
     feat_list = ['M', 'age','creatinine', 'LYVE1', 'REG1B', 'TFF1']
     for feat in feat_list:
@@ -53,6 +55,7 @@ def save_results(df, y_pred, run_id, output_file):
     df_result['model_version'] = run_id
 
     df_result.to_csv(output_file, index=False)
+    return df_result
 
 @task
 def prep_db(create_table_statement: str):
@@ -136,7 +139,7 @@ def monitoring_flow(
 
 
 @task
-def apply_model(input_file, run_id, output_file):
+def apply_model(input_file, run_id, output_file) -> pd.DataFrame:
     logger = get_run_logger()
 
     logger.info('reading the data from %s...', input_file)
@@ -153,8 +156,8 @@ def apply_model(input_file, run_id, output_file):
 
     logger.info('saving the result to %s...', output_file)
 
-    save_results(df, y_pred, run_id, output_file)
-    return output_file
+    df_results = save_results(df, y_pred, run_id, output_file)
+    return df_results
 
 @flow
 def pancreatic_cancer_prediction(
@@ -169,10 +172,48 @@ def pancreatic_cancer_prediction(
         output_file = output_dir + f'cohort2_predictions/{run_id}.csv'
         
         apply_model(
-             input_file=input_file,
-             run_id=run_id,
-             output_file=output_file
+                input_file=input_file,
+                run_id=run_id,
+                output_file=output_file
         )
+
+@flow
+def panc_cancer_prediction_monitor(
+    input_file: str,
+    ref_file: str,
+    output_dir: str,
+    run_id: str,
+    run_date: datetime = None):
+        if run_date is None:
+            ctx = get_run_context()
+            run_date = ctx.flow_run.expected_start_time
+        
+        output_file = output_dir + f'cohort2_predictions/{run_id}.csv'
+        
+        current_data = apply_model(
+                input_file=input_file,
+                run_id=run_id,
+                output_file=output_file
+        )
+
+        training_data = read_dataframe(ref_file, "data", "monitoring/data")
+        categorical = ['M']
+        numerical = ['age','creatinine', 'LYVE1', 'REG1B', 'TFF1']
+        target=['diagnosis']
+
+        current_data.rename(columns={"predicted_diagnosis": "diagnosis"}, inplace=True)
+
+        # Tell evidently which columns correspond to what kind of feature
+        column_mapping = ColumnMapping(
+            target=None, # we're not analyzing the ground truth
+            prediction=target[0],
+            numerical_features=numerical,
+            categorical_features=categorical
+        )
+
+        test_suite = TestSuite(tests = [DataDriftTestPreset()])
+        test_suite.run(reference_data=training_data[categorical + numerical + target], current_data=current_data[categorical + numerical + target], column_mapping=column_mapping)
+
 
 def run_pred():
     input_file = 's3://mlops-zoomcamp-2013/cohort2/Debernardi_2020_data_cohort2.csv'
@@ -196,7 +237,18 @@ def run_monitor():
         validation_path=validation_path
     )
 
+def run_monitor_test():
+    ref_path = "./monitoring/data/Debernardi_2020_data.csv"
+    cur_path ="./monitoring/data/Debernardi_2020_data_cohort2.csv"
+    panc_cancer_prediction_monitor(
+        cur_path,
+        ref_path,
+        "./local_data/",
+        '79b4b49914ad48598aac9946c1a61c3d'
+    )
+
 
 if __name__ == "__main__":
 #    run_pred()
-    run_monitor()
+#    run_monitor()
+    run_monitor_test()
