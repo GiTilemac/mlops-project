@@ -32,3 +32,43 @@ deployments:
     work_queue_name:
     job_variables: {}
   schedule:
+- name: pancreatic_batch_prediction
+  version:
+  tags: []
+  description:
+  entrypoint: batch_predict.py:pancreatic_cancer_prediction
+  parameters:
+    input_file: s3://mlops-zoomcamp-2013/cohort2/Debernardi_2020_data_cohort2.csv
+    output_dir: s3://mlops-zoomcamp-2013/results/
+    run_id: 79b4b49914ad48598aac9946c1a61c3d
+  work_pool:
+    name: local-work
+    work_queue_name:
+    job_variables: {}
+  schedule:
+- name: prediction_monitoring
+  version:
+  tags: []
+  description: 'Evidently Monitoring Report Pipeline '
+  entrypoint: batch_predict.py:monitoring_flow
+  parameters: {}
+  work_pool:
+    name: local-work
+    work_queue_name:
+    job_variables: {}
+  schedule:
+- name: prediction_monitoring_tests
+  version:
+  tags: []
+  description:
+  entrypoint: batch_predict.py:panc_cancer_prediction_monitor
+  parameters: {}
+  work_pool:
+    name: local-work
+    work_queue_name:
+    job_variables: {}
+  schedule:
+  pull:
+    - prefect.deployments.steps.git_clone:
+        repository: https://github.com/GiTilemac/mlops-project.git
+        branch: feature/monitor_tests
