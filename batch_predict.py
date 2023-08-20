@@ -62,6 +62,11 @@ def prep_db(create_table_statement: str):
             conn.execute("create database test;")
         with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example") as conn:
             conn.execute(create_table_statement)
+            # Insert inital data metrics as monitoring reference into database
+            conn.execute(
+                "insert into monitoring_metrics(cohort, prediction_drift, num_drifted_columns, share_missing_values) values (%s, %s, %s, %s)",
+                ("cohort1", 0.0, 0, 0.0)
+            )
 
 @task(log_prints=True)
 def generate_report(
