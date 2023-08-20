@@ -103,8 +103,8 @@ def generate_report(
 
 @flow
 def monitoring_flow(
-    train_path: str = "./data/Debernardi_2020_data.csv",
-    validation_path: str="./data/Debernardi_2020_data_cohort2.csv"
+    train_path: str = "./monitoring/data/Debernardi_2020_data.csv",
+    validation_path: str="./monitoring/data/Debernardi_2020_data_cohort2.csv"
 ) -> None:
     """ Evidently Monitoring Report Pipeline """
     df_train = read_dataframe(train_path)
