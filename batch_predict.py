@@ -214,7 +214,10 @@ def panc_cancer_prediction_monitor(
         test_suite = TestSuite(tests = [DataDriftTestPreset()])
         test_suite.run(reference_data=training_data[categorical + numerical + target], current_data=current_data[categorical + numerical + target], column_mapping=column_mapping)
 
-        test_suite.save_json('tests.json')
+        test_results = test_suite.as_dict()
+        if (test_results['summary']['failed_tests'] > 0):
+            print(f"!DATA DRIFT DETECTED - FAILED {test_results['summary']['failed_tests']} TESTS!")
+            
 
 def run_pred():
     input_file = 's3://mlops-zoomcamp-2013/cohort2/Debernardi_2020_data_cohort2.csv'
