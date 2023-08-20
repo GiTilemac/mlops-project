@@ -12,13 +12,13 @@ from evidently.report import Report
 from evidently import ColumnMapping
 from evidently.metrics import ColumnDriftMetric, DatasetDriftMetric, DatasetMissingValuesMetric
 
-import psycopg2
+import psycopg
 
-def read_dataframe(filename: str) -> pd.DataFrame:
+def read_dataframe(filename: str, src_dir: str, dst_dir: str) -> pd.DataFrame:
     """ Read dataset into dataframe """
 
     s3_bucket_block = S3Bucket.load("s3-bucket-block")
-    s3_bucket_block.download_folder_to_path(from_folder='data', to_folder="data")
+    s3_bucket_block.download_folder_to_path(from_folder=src_dir, to_folder=dst_dir)
 
     data = pd.read_csv(filename)
     data['diagnosis'] = data['diagnosis'].apply(lambda d: d-1)
@@ -55,33 +55,34 @@ def save_results(df, y_pred, run_id, output_file):
     df_result.to_csv(output_file, index=False)
 
 @task
-def prep_db(create_table_statement: str) -> psycopg2.extensions.cursor:
-    with psycopg2.connect("host=localhost port=5432 user=postgres password=example", autocommit=True) as conn:
+def prep_db(create_table_statement: str):
+    with psycopg.connect("host=localhost port=5432 user=postgres password=example", autocommit=True) as conn:
         res = conn.execute("SELECT 1 FROM pg_database WHERE datname='test'")
         if len(res.fetchall()) == 0:
             conn.execute("create database test;")
-        with psycopg2.connect("host=localhost port=5432 dbname=test user=postgres password=example") as conn:
+        with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example") as conn:
             conn.execute(create_table_statement)
-    return conn
 
 @task(log_prints=True)
 def generate_report(
     training_data: pd.DataFrame,
     validation_data: pd.DataFrame,
-    conn: psycopg2.extensions.cursor
+    conn: psycopg.Connection
 ):
+    # Selected features
     categorical = ['M']
     numerical = ['age','creatinine', 'LYVE1', 'REG1B', 'TFF1']
     target = ['diagnosis']
 
-    # Evidently Report
+    # Tell evidently which columns correspond to what kind of feature
     column_mapping = ColumnMapping(
-        target=None, # we're not analyzing the diagnosis variable
+        target=None, # we're not analyzing the ground truth
         prediction=target[0],
         numerical_features=numerical,
         categorical_features=categorical
     )
 
+    # Select metrics to calculate
     report = Report(metrics=[
         ColumnDriftMetric(column_name=target[0]), # Prediction Drift
         DatasetDriftMetric(),
@@ -89,15 +90,18 @@ def generate_report(
     ]
     )
 
+    # Generate evidently report and store as dict for database insertion
     report.run(reference_data=training_data, current_data=validation_data, column_mapping=column_mapping)
     report_dict = report.as_dict()
 
+    # Select the metrics we want to save
     prediction_drift = report_dict['metrics'][0]['result']['drift_score']
     num_drifted_columns = report_dict['metrics'][1]['result']['number_of_drifted_columns']
     share_missing_values = report_dict['metrics'][2]['result']['current']['share_of_missing_values']
 
+    # Insert selected metrics into database
     conn.execute(
-        "insert into dummy_metrics(cohort, prediction_drift, num_drifted_columns, share_missing_values) values (%s, %s, %s, %s)",
+        "insert into monitoring_metrics(cohort, prediction_drift, num_drifted_columns, share_missing_values) values (%s, %s, %s, %s)",
         ("cohort2", prediction_drift, num_drifted_columns, share_missing_values)
     )
 
@@ -107,22 +111,23 @@ def monitoring_flow(
     validation_path: str="./monitoring/data/Debernardi_2020_data_cohort2.csv"
 ) -> None:
     """ Evidently Monitoring Report Pipeline """
-    df_train = read_dataframe(train_path)
-    df_val = read_dataframe(validation_path)
+    df_train = read_dataframe(train_path, "data", "monitoring/data")
+    df_val = read_dataframe(validation_path, "cohort2", "monitoring/data")
 
     create_table_statement = """
     drop table if exists monitoring_metrics;
     create table monitoring_metrics(
-        cohort string,
+        cohort text,
         prediction_drift float,
         num_drifted_columns integer,
         share_missing_values float
     )
     """
 
-    db_cursor = prep_db(create_table_statement)
+    prep_db(create_table_statement)
 
-    generate_report(df_train, df_val, db_cursor)
+    with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example", autocommit=True) as conn: 
+        generate_report(df_train, df_val, conn)
 
 
 @task
@@ -130,7 +135,7 @@ def apply_model(input_file, run_id, output_file):
     logger = get_run_logger()
 
     logger.info('reading the data from %s...', input_file)
-    df = read_dataframe(input_file)
+    df = read_dataframe(input_file, "data", "data")
 
     logger.info('selecting features from data...')
     X = select_features(df)
@@ -164,7 +169,7 @@ def pancreatic_cancer_prediction(
              output_file=output_file
         )
 
-def run():
+def run_pred():
     input_file = 's3://mlops-zoomcamp-2013/cohort2/Debernardi_2020_data_cohort2.csv'
     output_dir = 's3://mlops-zoomcamp-2013/results/'
     run_id = '79b4b49914ad48598aac9946c1a61c3d'
@@ -176,5 +181,17 @@ def run():
         run_date=datetime.today().strftime('%Y-%m-%d')
     )
 
+def run_monitor():
+
+    train_path = "./monitoring/data/Debernardi_2020_data.csv"
+    validation_path ="./monitoring/data/Debernardi_2020_data_cohort2.csv"
+    
+    monitoring_flow(
+        train_path=train_path,
+        validation_path=validation_path
+    )
+
+
 if __name__ == "__main__":
-    run()
+#    run_pred()
+    run_monitor()
