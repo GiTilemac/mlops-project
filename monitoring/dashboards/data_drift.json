@@ -1,0 +1,226 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "PCC52D03280B7034C"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-GrYlRd"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "displayMode": "basic",
+          "minVizHeight": 10,
+          "minVizWidth": 0,
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showUnfilled": true,
+          "valueMode": "color"
+        },
+        "pluginVersion": "10.0.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "PCC52D03280B7034C"
+            },
+            "editorMode": "builder",
+            "format": "table",
+            "rawSql": "SELECT prediction_drift, cohort FROM monitoring_metrics LIMIT 50 ",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "prediction_drift",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "cohort",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            },
+            "table": "monitoring_metrics"
+          },
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "PCC52D03280B7034C"
+            },
+            "editorMode": "builder",
+            "format": "table",
+            "hide": false,
+            "rawSql": "SELECT num_drifted_columns, cohort FROM monitoring_metrics LIMIT 50 ",
+            "refId": "B",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "num_drifted_columns",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "cohort",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            },
+            "table": "monitoring_metrics"
+          },
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "PCC52D03280B7034C"
+            },
+            "editorMode": "builder",
+            "format": "table",
+            "hide": false,
+            "rawSql": "SELECT share_missing_values, cohort FROM monitoring_metrics LIMIT 50 ",
+            "refId": "C",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "share_missing_values",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "cohort",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            },
+            "table": "monitoring_metrics"
+          }
+        ],
+        "title": "Panel Title",
+        "type": "bargauge"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Drift as Bar Dashboard",
+    "uid": "ef1edae4-043c-4a0e-8dcf-88b0f85298ee",
+    "version": 1,
+    "weekStart": ""
+  }
