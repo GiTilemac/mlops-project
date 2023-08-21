@@ -1,0 +1,42 @@
+name: CI Tests
+on:
+  pull_request:
+    branches:
+      - 'develop'
+env:
+  AWS_DEFAULT_REGION: 'eu-central-1'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: action/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: mlops-zoomcamp
+          environment-file: mlops-zoomcamp-env.yaml
+          auto-activate-base: false
+
+      - name: Install dependencies
+        working-directory: "mlops-project"
+        run: conda activate mlops-zoomcamp
+
+      - name: Run Unit tests
+        working-directory: "mlops-project"
+        run: pytest tests/
+
+      - name: Lint
+        working-directory: "mlops-project"
+        run: pylint --recursive=y .
+
+      - name: Integration Test
+        working-directory: "mlops-project/integration-tests"
+        run: |
+          . run.sh
