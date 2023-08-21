@@ -6,14 +6,15 @@ set -e
 if [[ -z "${GITHUB_ACTIONS}" ]]; then
     # Navigate to this script's directory
     cd "$(dirname "$0")"
+fi
 
 # Generate local image using current time tag
 # If the image doesn't exist yet, build it
 if [ "${LOCAL_IMAGE_NAME}" == "" ]; then
-    LOCAL_TAG=`date +"%Y-%m-%d-%H-%M"`
+    LOCAL_TAG=$(date +"%Y-%m-%d-%H-%M")
     export LOCAL_IMAGE_NAME="predict-cancer-model:${LOCAL_TAG}"
     echo "LOCAL_IMAGE_NAME is not set, building a new image with tag ${LOCAL_IMAGE_NAME}"
-    docker build -t ${LOCAL_IMAGE_NAME} ..
+    docker build -t "${LOCAL_IMAGE_NAME}" ../dockerfiles
 else
     echo "no need to build image ${LOCAL_IMAGE_NAME}"
 fi
