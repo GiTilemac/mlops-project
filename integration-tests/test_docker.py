@@ -1,3 +1,5 @@
+# pylint: disable=duplicate-code
+
 import requests
 from deepdiff import DeepDiff
 

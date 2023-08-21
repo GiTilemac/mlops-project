@@ -47,7 +47,7 @@ def save_results(df, y_pred, run_id, output_file):
     feat_list = ['M', 'age','creatinine', 'LYVE1', 'REG1B', 'TFF1']
     for feat in feat_list:
         df_result[feat] = df[feat]
-    
+
     df_result['actual_diagnosis'] = df['diagnosis']
     df_result['predicted_diagnosis'] = y_pred
     df_result['model_version'] = run_id
@@ -131,7 +131,7 @@ def monitoring_flow(
 
     prep_db(create_table_statement)
 
-    with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example", autocommit=True) as conn: 
+    with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example", autocommit=True) as conn:
         generate_report(df_train, df_val, conn)
 
 
@@ -162,17 +162,17 @@ def pancreatic_cancer_prediction(
     output_dir: str,
     run_id: str,
     run_date: datetime = None):
-        if run_date is None:
-            ctx = get_run_context()
-            run_date = ctx.flow_run.expected_start_time
-        
-        output_file = output_dir + f'cohort2_predictions/{run_id}.csv'
-        
-        apply_model(
-             input_file=input_file,
-             run_id=run_id,
-             output_file=output_file
-        )
+    if run_date is None:
+        ctx = get_run_context()
+        run_date = ctx.flow_run.expected_start_time
+
+    output_file = output_dir + f'cohort2_predictions/{run_id}.csv'
+
+    apply_model(
+            input_file=input_file,
+            run_id=run_id,
+            output_file=output_file
+    )
 
 def run_pred():
     input_file = 's3://mlops-zoomcamp-2013/cohort2/Debernardi_2020_data_cohort2.csv'
@@ -190,7 +190,7 @@ def run_monitor():
 
     train_path = "./monitoring/data/Debernardi_2020_data.csv"
     validation_path ="./monitoring/data/Debernardi_2020_data_cohort2.csv"
-    
+
     monitoring_flow(
         train_path=train_path,
         validation_path=validation_path
