@@ -25,18 +25,15 @@ jobs:
           auto-activate-base: false
 
       - name: Install dependencies
-        working-directory: "mlops-project"
         run: conda activate mlops-zoomcamp
 
       - name: Run Unit tests
-        working-directory: "mlops-project"
         run: pytest tests/
 
       - name: Lint
-        working-directory: "mlops-project"
         run: pylint --recursive=y .
 
       - name: Integration Test
-        working-directory: "mlops-project/integration-tests"
+        working-directory: "integration-tests"
         run: |
           . run.sh
