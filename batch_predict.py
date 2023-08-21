@@ -117,9 +117,7 @@ def generate_report(
     report_dict = report.as_dict()
 
     # Select the metrics we want to save
-    prediction_drift = report_dict['metrics'][0]['result'][
-        'drift_score'
-    ]
+    prediction_drift = report_dict['metrics'][0]['result']['drift_score']
     num_drifted_columns = report_dict['metrics'][1]['result'][
         'number_of_drifted_columns'
     ]
