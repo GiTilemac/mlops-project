@@ -1,6 +1,5 @@
 {
-  "main-flow": "prediction-dev.py:main_flow",
   "monitoring-flow": "batch_predict.py:monitoring_flow",
-  "panc-cancer-prediction-monitor": "batch_predict.py:panc_cancer_prediction_monitor",
-  "pancreatic-cancer-prediction": "batch_predict.py:pancreatic_cancer_prediction"
+  "pancreatic-cancer-prediction": "batch_predict.py:pancreatic_cancer_prediction",
+  "training-flow": "train_model.py:training_flow"
 }

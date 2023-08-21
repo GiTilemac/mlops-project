@@ -20,12 +20,24 @@ pull:
     access_token:
 
 # the deployments section allows you to provide configuration for deploying flows
-deployments:
-- name: pancreatic1
+- name: pancreatic-cancer-training
   version:
   tags: []
-  description: 'The main training pipeline '
-  entrypoint: prediction-dev.py:main_flow
+  description: The main training pipeline
+  entrypoint: train_model.py:training_flow
+  parameters: {}
+  work_pool:
+    name: local-work
+    work_queue_name:
+    job_variables: {}
+  schedule:
+- name: prediction_batch_prediction
+  version:
+  tags: []
+  description: "The flow to predict pancreatic cancer on a dataset of patients (csv
+    on S3)\n\nGiven an output directory, the input dataset csv file and the model
+    ID,\npredict the presence of pancreatic cancer for each patient"
+  entrypoint: batch_predict.py:pancreatic_cancer_prediction
   parameters: {}
   work_pool:
     name: local-work

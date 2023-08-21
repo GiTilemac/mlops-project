@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# This script runs the integration test.
+# 1. Builds the docker image with the prediction script
+# 2. Starts the container and bind mounts the model
+# 3. Send a request and compares the result with the expected
+
 # Interrupt script on error
 set -e
 
