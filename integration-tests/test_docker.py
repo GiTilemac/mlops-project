@@ -20,10 +20,11 @@ patient100 = {
     "REG1A": [None],
 }
 
-
+# Send a request to the deployed prediction service with an example patient
 url = 'http://localhost:9696/predict'
 actual_response = requests.post(url, json=patient100, timeout=20).json()
 
+# Check the difference from the expected response
 expected_response = {
     'diagnosis': 1,
     'model_run_id': '79b4b49914ad48598aac9946c1a61c3d',
@@ -31,7 +32,6 @@ expected_response = {
 }
 
 diff = DeepDiff(actual_response, expected_response, significant_digits=1)
-
 print(f'diff={diff}')
 
 assert 'type_changes' not in diff

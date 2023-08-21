@@ -21,7 +21,13 @@ jobs:
         with:
           python-version: 3.9
 
+      - uses: KengoTODA/actions-setup-docker-compose@v1
+      - name: Install Docker-Compose
+        with:
+          version: '2.5.0'
+
       - uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Conda and activate environment
         with:
           activate-environment: mlops-zoomcamp
           environment-file: mlops-zoomcamp-env.yaml
