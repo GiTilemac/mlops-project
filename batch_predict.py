@@ -1,22 +1,20 @@
 from datetime import datetime
-import pandas as pd
-import numpy as np
+
 import mlflow
+import numpy as np
+import pandas as pd
+import psycopg
 import xgboost as xgb
-
-from prefect import task, flow, get_run_logger
-from prefect.context import get_run_context
-from prefect_aws import S3Bucket
-
-from evidently.report import Report
 from evidently import ColumnMapping
 from evidently.metrics import (
     ColumnDriftMetric,
     DatasetDriftMetric,
-    DatasetMissingValuesMetric,
+    DatasetMissingValuesMetric
 )
-
-import psycopg
+from evidently.report import Report
+from prefect import flow, get_run_logger, task
+from prefect.context import get_run_context
+from prefect_aws import S3Bucket
 
 
 def read_dataframe(filename: str, src_dir: str, dst_dir: str) -> pd.DataFrame:

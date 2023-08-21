@@ -1,10 +1,10 @@
 import os
+
 import mlflow
-import xgboost as xgb
 import numpy as np
 import pandas as pd
-
-from flask import Flask, request, jsonify
+import xgboost as xgb
+from flask import Flask, jsonify, request
 
 
 def get_model_location(run_id):
