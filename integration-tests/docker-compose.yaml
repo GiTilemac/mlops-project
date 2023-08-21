@@ -1,0 +1,11 @@
+services:
+  backend:
+    image: ${LOCAL_IMAGE_NAME}
+    ports:
+      - "9696:9696"
+    environment:
+      - MODEL_LOCATION=/app/model
+      - TEST_RUN=True
+      - RUN_ID=79b4b49914ad48598aac9946c1a61c3d
+    volumes:
+      - "./model:/app/model"
