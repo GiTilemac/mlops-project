@@ -18,4 +18,3 @@ skip-string-normalization = true
 
 [tool.isort]
 multi_line_output = 3
-length_sort = true
