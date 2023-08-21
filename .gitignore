@@ -3,3 +3,5 @@ monitoring/data/*.csv
 local_data
 alternative_trainings
 __pycache__
+.pytest_cache
+integration-tests/model
