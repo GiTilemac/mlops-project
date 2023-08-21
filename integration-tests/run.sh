@@ -22,7 +22,7 @@ fi
 # Start the prediction container via docker-compose
 docker-compose up -d
 
-sleep 1
+sleep 5 # Sleep more, to give container time to start
 
 # Send the request to the service and test the response
 python test_docker.py

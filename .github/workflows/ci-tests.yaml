@@ -27,9 +27,6 @@ jobs:
           environment-file: mlops-zoomcamp-env.yaml
           auto-activate-base: false
 
-      - name: Install dependencies
-        run: conda activate mlops-zoomcamp
-
       - name: Run Unit tests
         run: pytest tests/
 
@@ -39,4 +36,4 @@ jobs:
       - name: Integration Test
         working-directory: "integration-tests"
         run: |
-          . run.sh
+          bash ./run.sh
