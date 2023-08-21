@@ -12,7 +12,7 @@ jobs:
   test:
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash -l {0}  # Needed to run conda
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
