@@ -155,10 +155,15 @@ def train_model(
 def training_flow(
         train_path: str = "./data/Debernardi_2020_data.csv"
 ) -> None:
-    """The main training pipeline"""
+    """The main training pipeline
+
+    FOR PEER REVIEWER WITHOUT AWS ACCESS
+    set TRACKING_SERVER_HOST as localhost and on a separate window, run "mlflow start"
+    """
 
     #MLFlow Settings
     TRACKING_SERVER_HOST = "ec2-3-79-25-97.eu-central-1.compute.amazonaws.com"
+    #TRACKING_SERVER_HOST = 'localhost'
     mlflow.set_tracking_uri(f"http://{TRACKING_SERVER_HOST}:5000")
     mlflow.set_experiment("pancreatic-cancer-experiment")
 
